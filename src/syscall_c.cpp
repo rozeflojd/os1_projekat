@@ -40,9 +40,9 @@ int mem_free(void* adr){
 }
 
 int thread_create(thread_t* handle, void(*start_routine)(void*), void* arg){
-    if(!handle || !start_routine) return -1;
+    if(!handle) return -1;
     //alokacija steka i proslednjivanje kroz registre
-    void* stek = mem_alloc(DEFAULT_STACK_SIZE);
+    void* stek = start_routine ? mem_alloc(DEFAULT_STACK_SIZE) : nullptr;
     asm volatile("mv a4, %0" :: "r"(stek));
 
     //smestanje arg na stek
@@ -99,7 +99,7 @@ int sem_close(sem_t handle){
 
 int sem_wait(sem_t handle){
     asm volatile("mv a1, %0" :: "r"(handle));
-    asm volatile("li a0, %0" :: "i"(0x22));
+    asm volatile("li a0, %0" :: "i"(0x23));
     asm volatile("ecall");
     int povrVrednost;
     asm volatile("mv %0, a0" : "=r"(povrVrednost));
@@ -108,7 +108,7 @@ int sem_wait(sem_t handle){
 
 int sem_signal(sem_t handle){
     asm volatile("mv a1, %0" :: "r"(handle));
-    asm volatile("li a0, %0" :: "i"(0x22));
+    asm volatile("li a0, %0" :: "i"(0x24));
     asm volatile("ecall");
     int povrVrednost;
     asm volatile("mv %0, a0" : "=r"(povrVrednost));

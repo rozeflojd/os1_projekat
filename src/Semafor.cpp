@@ -3,6 +3,7 @@
 //
 
 #include "../h/Semafor.hpp"
+#include "../test/printing.hpp"
 
 Sem* Sem::sem_open(int val){
     return new Sem(val);
@@ -19,7 +20,7 @@ void Sem::sem_close() {
 void Sem::sem_wait() {
     TCB* curr = TCB::running;
     if (--value < 0) {
-        curr->setActive(0);
+        curr->setActive(false);
         blokirani.addLast(curr);
         TCB::dispatch();
     }
@@ -28,7 +29,7 @@ void Sem::sem_wait() {
 void Sem::sem_signal() {
     value++;
     if (value <= 0 && blokirani.peekFirst()){
-        blokirani.peekFirst()->setActive(1);
+        blokirani.peekFirst()->setActive(true);
         Scheduler::put(blokirani.removeFirst());
     }
 }

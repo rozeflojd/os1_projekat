@@ -5,9 +5,9 @@
 
 #include "../h/syscall_c.h"
 
-TCB *TCB::running = nullptr;
+#include "../test/printing.hpp"
 
-//uint64 TCB::timeSliceCounter = 0;
+TCB *TCB::running = nullptr;
 
 TCB * TCB::createThread(TCB::Body body, void* arguments, char* stack_space) {
     return new TCB(body, arguments, stack_space);
@@ -17,9 +17,13 @@ TCB * TCB::createThread(TCB::Body body, void* arguments, char* stack_space) {
 void TCB::dispatch(){
     //treba da se doda i provera za blocked
     TCB *old = running;
-    if(!old->isFinished()) { Scheduler::put(old); }
+    if(!old->isFinished() && old->getActive()) { Scheduler::put(old); }
+    else if (old->isFinished()) {
+        delete old->stack;
+        delete old;
+    }
     running = Scheduler::get();
-    if(old != running) TCB::contextSwitch(&old->context, &running->context);
+    if (old != running) TCB::contextSwitch(&old->context, &running->context);
 }
 
 void TCB::threadWrapper() {

@@ -21,7 +21,6 @@ void Riscv::handleSupervisorTrap() {
 
         uint64 sisPoziv;
         asm volatile("ld %0, 8*10(fp)" : "=r"(sisPoziv));
-
         switch (sisPoziv) {
             case 0x42: {
                 //PUTC
@@ -95,13 +94,13 @@ void Riscv::handleSupervisorTrap() {
             }
             case 0x21: {
                 //SEM_OPEN
-                Sem* handle;
+                Sem** handle;
                 int val;
 
                 asm volatile("ld %0, 8*11(fp)" : "=r"(handle));
                 asm volatile("ld %0, 8*12(fp)" : "=r"(val));
 
-                handle = Sem::sem_open(val);
+                *handle = Sem::sem_open(val);
                 //rez se vraca u a0
                 uint64 rez;
                 if(handle) rez = 0;
@@ -142,7 +141,7 @@ void Riscv::handleSupervisorTrap() {
                 asm volatile("ld %0, 8*11(fp)" : "=r"(handle));
 
                 int povratnaVrednost = 0;
-                handle->sem_wait();
+                handle->sem_signal();
 
                 asm volatile("sd %0, 8*10(fp)" :: "r"(povratnaVrednost));
 
@@ -157,8 +156,13 @@ void Riscv::handleSupervisorTrap() {
             }
             case 0x26: {
                 // sem_trywait
-                int rez = -1;
-                asm volatile("sd %0, 8*10(fp)" :: "r"(rez));
+                Sem* handle;
+                asm volatile("ld %0, 8*11(fp)" : "=r"(handle));
+
+                int povratnaVrednost = 0;
+                handle->sem_trywait();
+
+                asm volatile("sd %0, 8*10(fp)" :: "r"(povratnaVrednost));
 
                 break;
             }

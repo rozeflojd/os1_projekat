@@ -26,8 +26,8 @@ void operator delete[](void *p) noexcept
 }
 
 Thread::Thread(void (*body)(void *), void *arg) : body(body), arg(arg){
-}
 
+}
 
 Thread::~Thread(){
 

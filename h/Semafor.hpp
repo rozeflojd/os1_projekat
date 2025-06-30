@@ -11,7 +11,7 @@ private:
     //bool zatvoren;
 
 public:
-    Sem(int init = 1) : value(init){ }
+    Sem(int init = 1) : value(init) {}
 
     int getValue() const { return value; }
 
